@@ -7,12 +7,26 @@ import android.util.Log;
 
 public class MyLocationListener implements LocationListener {
     final String LOG_TAG = MyLocationListener.class.getSimpleName();
+    MainActivity mainActivity;
+
+    public void setMainActivity(MainActivity mainActivity){
+        this.mainActivity = mainActivity;
+    }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(final Location location) {
 
         String logMessage = LogHelper.FormatLocationInfo(location);
         Log.d(LOG_TAG, "onLocationChanged " + logMessage);
+        Log.d(LOG_TAG, "onLocationChanged Thread" + Thread.currentThread());
+
+        // Running on UI Thread from HandleThread
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.setLocation(location);
+            }
+        });
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.gooner10.myapplication;
 
 import android.content.Context;
 import android.location.Criteria;
-import android.location.LocationListener;
+import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
@@ -12,15 +12,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    LocationListener mGpsListener;
-    LocationListener mNetworkListener;
+    MyLocationListener mGpsListener;
+    MyLocationListener mNetworkListener;
     String LOG_TAG = MainActivity.class.getSimpleName();
     Looper mLooper;
+    TextView mTextView;
 
     NetworkProviderStatusReceiver networkProviderStatusReceiver;
 
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mTextView = (TextView) findViewById(R.id.location);
     }
 
     @Override
@@ -37,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
             // Create a Handler Thread and get Looper
-            HandlerThread mHandlerThread = new HandlerThread("LocationThread");
+            HandlerThread mHandlerThread = new HandlerThread("ActivityLocationThread");
             mHandlerThread.start();
             mLooper = mHandlerThread.getLooper();
 
@@ -49,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
 
                 // If Enabled get LocationListener running and pass it to background HandlerThread
                 mNetworkListener = new MyLocationListener();
+
+                if (mNetworkListener != null) {
+                    mNetworkListener.setMainActivity(this);
+                }
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mNetworkListener, mLooper);
             }
 //            mGpsListener = new MyLocationListener();
@@ -58,6 +65,11 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void setLocation(Location location) {
+        mTextView = (TextView) findViewById(R.id.location);
+        mTextView.setText("Latitude: " + location.getLatitude() + " Longitude: " + location.getLongitude());
     }
 
     @Override
